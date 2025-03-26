@@ -1,0 +1,40 @@
+DECLARE
+   v_emp_code EMP.emp_code%TYPE := &emp_code;
+   v_emp_name EMP.emp_name%TYPE := '&emp_name';
+   v_dept_code EMP.dept_code%TYPE := &dept_code;
+   dummy NUMBER;
+BEGIN
+   -- Check for duplicate employee code in EMP table
+   BEGIN
+      SELECT 1 INTO dummy
+      FROM EMP
+      WHERE emp_code = v_emp_code;
+      
+      DBMS_OUTPUT.PUT_LINE('Employee code ' || v_emp_code || ' already exists. Row cannot be added.');
+      RETURN;
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         NULL;  -- No duplicate found; continue processing
+   END;
+
+   -- Check if the provided department code exists in DEPT table
+   BEGIN
+      SELECT 1 INTO dummy
+      FROM DEPT
+      WHERE dept_code = v_dept_code;
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         DBMS_OUTPUT.PUT_LINE('Department code ' || v_dept_code || ' does not exist. Row cannot be added.');
+         RETURN;
+   END;
+
+   -- Insert the new employee row into EMP table
+   INSERT INTO EMP(emp_code, emp_name, dept_code)
+   VALUES (v_emp_code, v_emp_name, v_dept_code);
+   COMMIT;
+   DBMS_OUTPUT.PUT_LINE('Row added successfully.');
+EXCEPTION
+   WHEN OTHERS THEN
+      DBMS_OUTPUT.PUT_LINE('Error occurred: ' || SQLERRM);
+END;
+/
